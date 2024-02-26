@@ -1,6 +1,3 @@
-from linkedQFile import LinkedQ
-
-
 class HashNode:
     """Noder till klassen Hashtable """
 
@@ -11,6 +8,7 @@ class HashNode:
         """
         self.key = key
         self.data = data
+        self.next = None
 
 class Hashtable:
 
@@ -29,20 +27,25 @@ class Hashtable:
         """
         index = self.hashfunction(key) % self.size
         node = HashNode(key, data)
+        print(str(index) + ",")
+        #print("Hej")
         if self.list[index] == None:
+            #print("None in list")
             self.list[index] = node
-        else: 
-            self.que = LinkedQ()
-            if isinstance(self.list[index], LinkedQ):
-                if not self.list[index].isEmpty():
-                    value = self.list[index].dequeue()
-                    self.que.enqueue(value)
-                self.que.enqueue(node)
-                self.list[index] = self.que
+        else:
+            current = self.list[index]
+            if current.key == key:
+                current.data = data
             else:
-                self.que.enqueue(self.list[index])
-                self.que.enqueue(node)
-                self.list[index] = self.que
+                found = False
+                while current.next:
+                    current = current.next
+                    if current.key == key:
+                        current.data = data
+                        found = True
+                        break
+                if not found:
+                    current.next = node
 
     def search(self, key):
         """
@@ -52,15 +55,15 @@ class Hashtable:
         """
         hashvalue = self.hashfunction(key)
         index = hashvalue % self.size
-
-        if self.list[index] != None:
-            if isinstance(self.list[index], LinkedQ):
-                thing = self.list[index].dequeue()
-                while self.hashfunction(thing.key) != hashvalue:
-                    thing = self.list[index].dequeue()
-                return thing.data
-            else:
-                return self.list[index]
+        #print(index)
+        current = self.list[index]
+        if current != None:
+            while current:
+                if current.key == key:
+                    return current.data
+                else:
+                    current = current.next
+            raise KeyError
         else:
             raise KeyError
 
@@ -70,8 +73,10 @@ class Hashtable:
         Beräknar hashfunktionen för key
         """
         self.number = ""
+        i = 5
         for self.letter in key:
-            self.number = self.number + str(ord(self.letter))
+            i +=1
+            self.number = self.number + str((ord(self.letter) * 16**i))
         return int(self.number)
 
 import csv
@@ -82,5 +87,3 @@ with open("kdrama.csv", newline="") as csvfile:
     for row in linereader:
         drama_dict.store(row[0], row[1:])
 
-print(drama_dict.search("The bride of Habaek"))
-#print(drama_dict.search("Hej"))
